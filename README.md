@@ -1,2 +1,2 @@
 # RL-Option-Hedging
-Reinforcement Learning for Optimal Option Hedging
+Reinforcement Learning for Optimal European Option Hedging
