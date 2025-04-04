@@ -3,10 +3,11 @@
 
 
 FLXOPINT Month Date Year.txt | Flxopint Month Date Year.txt -> flxopint.yearmonthdate.txt
-#theres no way this is the best way, optimize#
+#WIP: works but make it better
 
 for file in FLXOPINT* Flxopint*; do
 	new_name=$(echo "$file" | awk -F' ' '{
+		
         	month_map["Oct"]="10";
 		month_map["Nov"]="11";
 		month_map["Dec"]="12";
@@ -34,8 +35,50 @@ for file in FLXOPINT* Flxopint*; do
 		
         	printf "flxopint.%s%s%s.txt\n", year, month, day
     	}')
+
 	if [[ -n "$new_name" ]]; then
 		mv "$file" "$new_name"
 		echo "Renamed: $file -> $new_name"
 	fi
 done
+
+
+
+Reformatting contents within flex reports
+#WIP: works but make it better
+
+for file in *.txt; do
+	awk '
+	BEGIN { seen_table_header = 0 } 
+	
+	# Remove the report header block
+	/^ THE OPTIONS CLEARING CORPORATION - CHICAGO, ILLINOIS/,/OPTIONS ARE NOT AVAILABLE/ { next }
+
+	# Remove lines with EUR
+	/.*EUR/ { next }
+	
+	# Detecting table headers
+	/^[[:space:]]*EXPIRATION/ {
+		if (seen_table_header) next
+		seen_table_header = 1
+	}
+	/^[[:space:]]*SYMBOL/ {
+		if (seen_table_header==2) next
+		seen_table_header = 2
+	}
+
+	# Removing *
+	/^[[:space:]].*\*/ { next }
+
+	# Removing MSCI
+	/^*MSCI Emerging Markets/ { next }
+
+	# Removing empty lines
+	/^[[:space:]]*$/ { next }
+	
+	{ print }
+    	' "$file" > "cleaned_$file"
+		
+		mv "cleaned_$file" "$file"  # Replace the original file
+done
+	
